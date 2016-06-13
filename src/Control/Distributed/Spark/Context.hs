@@ -32,6 +32,12 @@ instance Coercible SparkContext ('Class "org.apache.spark.api.java.JavaSparkCont
 newSparkContext :: SparkConf -> IO SparkContext
 newSparkContext conf = new [coerce conf]
 
+getOrCreateSparkContext :: SparkConf -> IO SparkContext
+getOrCreateSparkContext cnf = do
+  scalaCtx :: J ('Class "org.apache.spark.SparkContext") <-
+    callStatic (sing :: Sing "org.apache.spark.SparkContext") "getOrCreate" [coerce cnf]
+  callStatic (sing :: Sing "org.apache.spark.api.java.JavaSparkContext") "fromSparkContext" [coerce scalaCtx]
+
 -- | Adds the given file to the pool of files to be downloaded
 --   on every worker node. Use 'getFile' on those nodes to
 --   get the (local) file path of that file in order to read it.
@@ -51,10 +57,3 @@ master :: SparkContext -> IO Text
 master sc = do
   res <- call sc "master" []
   reify res
-
-getOrCreate :: SparkConf -> IO SparkContext
-getOrCreate cnf = do
-  scalaCtx :: J ('Class "org.apache.spark.SparkContext") <-
-    callStatic (sing :: Sing "org.apache.spark.SparkContext") "getOrCreate" [coerce cnf]
-
-  callStatic (sing :: Sing "org.apache.spark.api.java.JavaSparkContext") "fromSparkContext" [coerce scalaCtx]
