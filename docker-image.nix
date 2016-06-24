@@ -10,7 +10,7 @@ let baseImage = dockerTools.pullImage {
     sparkleShell = import ./shell.nix {};
     deriv = buildEnv {  # dockerTools has a mergeDrvs functions also. Not tested
       name = "sparklenix-container-env";
-      paths = sparkleShell.nativeBuildInputs;
+      paths = sparkleShell.nativeBuildInputs ++ [haskellPackages.stack];
     };
 in
 dockerTools.buildImage {
@@ -24,7 +24,9 @@ dockerTools.buildImage {
 
   config = {
     Cmd = [ "/bin/bash" ];
-    Env = [ "LD_LIBRARY_PATH=${sparkleShell.LD_LIBRARY_PATH}" ];
+    Env = [ "LD_LIBRARY_PATH=${sparkleShell.LD_LIBRARY_PATH}"
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" ];
+            # PATH is necessary because stack will append its own dirs to it
   };
 }
 
