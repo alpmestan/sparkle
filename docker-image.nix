@@ -18,9 +18,9 @@ dockerTools.buildImage {
   fromImage = baseImage;
   contents = deriv;
 
-  runAsRoot = ''
-     #!${stdenv.shell}
-  '';
+  # runAsRoot = ''
+  #    #!${stdenv.shell}
+  # '';
 
   config = {
     Cmd = [ "/bin/bash" ];
@@ -28,3 +28,7 @@ dockerTools.buildImage {
   };
 }
 
+
+### USE IT WITH:
+# $   nix-build docker-image.nix && docker load < result
+###
