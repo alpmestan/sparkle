@@ -9,6 +9,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -54,7 +55,8 @@ import qualified Data.ByteString.Char8 as BS
 import Data.ByteString (ByteString)
 import Data.Int
 import Data.Map (fromList)
-import Data.Singletons (Sing, SingI(..), SomeSing(..), KProxy(..))
+import Data.Proxy
+import Data.Singletons (Sing, SingI(..), SomeSing(..))
 import Data.Singletons.TypeLits (KnownSymbol, symbolVal)
 import Data.Word
 import Foreign.C (CChar)
@@ -191,7 +193,7 @@ instance Storable JValue where
 
   peek _ = error "Storable JValue: undefined peek"
 
-jtypeOf :: JValue -> SomeSing ('KProxy :: KProxy JType)
+jtypeOf :: JValue -> SomeSing JType
 jtypeOf (JBoolean _) = SomeSing (sing :: Sing ('Prim "boolean"))
 jtypeOf (JByte _) = SomeSing (sing :: Sing ('Prim "byte"))
 jtypeOf (JChar _) = SomeSing (sing :: Sing ('Prim "char"))
@@ -221,7 +223,7 @@ signature (SGeneric ty _) = signature ty
 signature SVoid = "V"
 
 methodSignature
-  :: [SomeSing ('KProxy :: KProxy JType)]
+  :: [SomeSing JType]
   -> Sing (ty :: JType)
   -> ByteString
 methodSignature args ret =

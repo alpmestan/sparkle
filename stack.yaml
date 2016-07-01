@@ -4,10 +4,10 @@ packages:
 - apps/hello
 - apps/lda
 - apps/rdd-ops
-resolver: lts-5.1
+resolver: nightly-2016-06-28
 extra-deps:
 - thread-local-storage-0.1.0.3
-- distributed-closure-0.3.0.0
+- distributed-closure-0.3.1.0
 nix:
   enable: false
   shell-file: shell.nix
