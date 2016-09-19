@@ -4,9 +4,13 @@ packages:
 - apps/hello
 - apps/lda
 - apps/rdd-ops
-resolver: lts-6.16
+- location: vendor/constraints
+  extra-dep: true
+resolver: nightly-2016-09-09
 extra-deps:
 - thread-local-storage-0.1.0.3
 nix:
   # Requires Stack >= 1.2.
   shell-file: shell.nix
+allow-newer: true
+skip-ghc-check: true
