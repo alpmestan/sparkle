@@ -3,6 +3,7 @@ packages:
 - apps/hello
 - apps/lda
 - apps/rdd-ops
+- apps/zero
 resolver: lts-6.21
 extra-deps:
 - thread-local-storage-0.1.0.3
