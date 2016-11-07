@@ -1,4 +1,8 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE StaticPointers #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -8,10 +12,15 @@
 module Control.Distributed.Spark.RDD where
 
 import Control.Distributed.Closure
-import Control.Distributed.Spark.Closure ()
+import Control.Distributed.Closure.TH
+import Control.Distributed.Spark.Closure
 import Control.Distributed.Spark.Context
+import Data.ByteString (ByteString)
 import Data.Int
+import Data.Singletons
 import Data.Text (Text)
+import Data.Typeable
+import Foreign.JNI
 import Language.Java
 
 import qualified Data.Text as Text
@@ -92,6 +101,27 @@ aggregate seqOp combOp zero rdd = do
   res :: JObject <- call rdd "aggregate" [coerce jzero, coerce jseqOp, coerce jcombOp]
   reify (unsafeCast res)
 
+treeAggregate :: ( Reflect (Closure (b -> a -> b)) ty1
+                 , Reflect (Closure (b -> b -> b)) ty2
+                 , Reflect b ty3
+                 , Reify b ty3
+                 )
+              => Closure (b -> a -> b)
+              -> Closure (b -> b -> b)
+              -> b
+              -> Int32
+              -> RDD a
+              -> IO b
+treeAggregate seqOp combOp zero depth rdd = do
+  jseqOp <- reflect seqOp
+  jcombOp <- reflect combOp
+  jzero <- upcast <$> reflect zero
+  let jdepth = coerce depth
+  res :: JObject <-
+    call rdd "treeAggregate"
+      [ coerce jseqOp, coerce jcombOp, coerce jzero, jdepth ]
+  reify (unsafeCast res)
+
 count :: RDD a -> IO Int64
 count rdd = call rdd "count" []
 
@@ -111,6 +141,12 @@ textFile :: SparkContext -> FilePath -> IO (RDD Text)
 textFile sc path = do
   jpath <- reflect (Text.pack path)
   call sc "textFile" [coerce jpath]
+
+-- recordLength = number of bytes
+binaryRecords :: SparkContext -> FilePath -> Int32 -> IO (RDD ByteString)
+binaryRecords sc fp recordLength = do
+  jpath <- reflect (Text.pack fp)
+  call sc "binaryRecords" [coerce jpath, coerce recordLength]
 
 distinct :: RDD a -> IO (RDD a)
 distinct r = call r "distinct" []

@@ -17,6 +17,10 @@ module Control.Distributed.Spark.Closure
   ( JFun1
   , JFun2
   , apply
+  , closFun1
+  , pairDict
+  , clos2bs
+  , bs2clos
   ) where
 
 import Control.Distributed.Closure
@@ -27,6 +31,13 @@ import Data.ByteString (ByteString)
 import Data.Typeable (Typeable)
 import Foreign.JNI
 import Language.Java
+
+
+clos2bs :: Typeable a => Closure a -> ByteString
+clos2bs = LBS.toStrict . encode
+
+bs2clos :: Typeable a => ByteString -> Closure a
+bs2clos = decode . LBS.fromStrict
 
 -- | The main entry point for Java code to apply a Haskell 'Closure'. This
 -- function is foreign exported.
@@ -80,16 +91,11 @@ closFun2 Dict f args = do
     a' <- reifA a
     b' <- reifB b
     upcast <$> reflC (f a' b')
+
   where
     reifA = reify :: J ty1 -> IO a
     reifB = reify :: J ty2 -> IO b
     reflC = reflect :: c -> IO (J ty3)
-
-clos2bs :: Typeable a => Closure a -> ByteString
-clos2bs = LBS.toStrict . encode
-
-bs2clos :: Typeable a => ByteString -> Closure a
-bs2clos = decode . LBS.fromStrict
 
 -- TODO No Static (Reify/Reflect (Closure (a -> b)) ty) instances yet.
 
