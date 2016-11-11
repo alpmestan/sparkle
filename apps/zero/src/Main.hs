@@ -2,27 +2,23 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Control.Distributed.Spark as S
-import Control.Exception (bracket)
+import qualified Control.Distributed.Spark as S
 import Control.Monad
-import Data.ByteString as BS
+import Data.ByteString (ByteString, count, pack)
 import Data.Int
-import System.Directory (doesFileExist)
-import System.Environment (getArgs)
-import System.IO
-import System.Random
 
 main :: IO ()
 main = do
-  conf <- newSparkConf "Example"
-  sc <- getOrCreateSparkContext conf
-  rdd0 <- binaryRecords sc "./some.data" (fromIntegral blockSize)
-  rdd1 <- S.map (closure $ static countZero) rdd0
-  res <- S.reduce (closure $ static (+)) rdd1
-  print res
+  conf <- S.newSparkConf "Example"
+  sc <- S.newSparkContext conf
+  rdd0 <- S.binaryRecords sc "some.data" (fromIntegral blockSize)
+  rdd1 <- S.map (S.closure $ static countZero) rdd0
+  res <- S.reduce (S.closure $ static (+)) rdd1
+  putStrLn $ ">>> Found " ++ show res ++ " bytes equal to 0"
+
 
 countZero :: ByteString -> Int32
-countZero = fromIntegral . BS.count 0
+countZero = fromIntegral . count 0
 
 blockSize :: Int
-blockSize = 1000000
+blockSize = 64000

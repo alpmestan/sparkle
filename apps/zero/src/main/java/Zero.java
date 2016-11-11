@@ -6,12 +6,11 @@ import org.apache.spark.api.java.function.Function2;
 
 public class Zero {
   public static void main(String[] args) {
-      int blockSize = 1000000;
+      int blockSize = 64000;
       SparkConf conf = new SparkConf().setAppName("Simple Application");
       JavaSparkContext sc = new JavaSparkContext(conf);
 
-      JavaRDD<byte[]> data = sc.binaryRecords("../../some.data", blockSize);
-      System.out.println(">>> Using " + data.getNumPartitions() + " partitions.");
+      JavaRDD<byte[]> data = sc.binaryRecords("some.data", blockSize);
       JavaRDD<Integer> newData = data.map(new Function<byte[], Integer>() {
 	      public Integer call(byte[] bs) {
 		  int total = 0;
