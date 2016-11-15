@@ -43,6 +43,11 @@ parallelize sc xs = do
           "asList"
           [coerce (unsafeCast jxs :: JObjectArray)]
 
+repartition :: Int32 -> RDD a -> IO (RDD a)
+repartition nbPart rdd =
+  call rdd "repartition" [JInt nbPart]
+
+
 filter
   :: Reflect (Closure (a -> Bool)) ty
   => Closure (a -> Bool)

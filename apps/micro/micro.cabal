@@ -1,0 +1,23 @@
+name:                micro
+version:             0.1
+synopsis:            
+-- description:         
+license:             AllRightsReserved
+license-file:        LICENSE
+author:              LeapYear Technologies
+maintainer:          LeapYear Technologies
+copyright:           LeapYear Technologies
+-- category:            
+build-type:          Simple
+extra-source-files:  ChangeLog.md
+cabal-version:       >=1.10
+
+executable micro
+  main-is:             Main.hs
+  hs-source-dirs:    src
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends: base >=4.7 && <5, distributed-closure, sparkle, bytestring
+  default-language: Haskell2010
+  ghc-options: -dynamic -lpthread -threaded -O2
+  ld-options: -pie -Wl,-z,origin -Wl,-rpath,$ORIGIN
